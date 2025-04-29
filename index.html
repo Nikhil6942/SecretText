@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SecretText: Message Encryptor</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.png" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    input, select, button, textarea {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+    }
+    #shareBtn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #shareBtn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 SecretText: Message Encryptor</h1>
+
+  <textarea id="inputText" placeholder="Enter your message here..."></textarea><br />
+  <label>Shift: </label>
+  <input type="number" id="shift" min="1" max="25" value="3" /><br />
+
+  <button onclick="encrypt()">Encrypt</button>
+  <button onclick="decrypt()">Decrypt</button>
+  <button id="shareBtn" onclick="shareMessage()">📤 Share</button>
+
+  <h2>Result:</h2>
+  <textarea id="resultText" readonly></textarea>
+
+  <script>
+    function caesarCipher(str, shift, decrypt = false) {
+      if (decrypt) shift = 26 - shift;
+      return str.toUpperCase().split('').map(char => {
+        if (char.match(/[A-Z]/)) {
+          return String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+        } else {
+          return char;
+        }
+      }).join('');
+    }
+
+    function encrypt() {
+      const text = document.getElementById('inputText').value;
+      const shift = parseInt(document.getElementById('shift').value);
+      const encrypted = caesarCipher(text, shift);
+      document.getElementById('resultText').value = encrypted;
+    }
+
+    function decrypt() {
+      const text = document.getElementById('inputText').value;
+      const shift = parseInt(document.getElementById('shift').value);
+      const decrypted = caesarCipher(text, shift, true);
+      document.getElementById('resultText').value = decrypted;
+    }
+
+    function shareMessage() {
+      const message = document.getElementById('resultText').value;
+      if (navigator.share) {
+        navigator.share({
+          title: 'SecretText Message',
+          text: message,
+        }).catch(err => console.log('Share failed:', err));
+      } else {
+        alert("Sharing not supported on this browser.");
+      }
+    }
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log("✅ Service Worker Registered"));
+    }
+  </script>
+</body>
+</html>
